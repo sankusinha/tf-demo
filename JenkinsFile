@@ -35,7 +35,8 @@ pipeline {
         stage("Terraform Approval of plan") {
             when {
                 anyOf {
-                    branch 'master'
+                    branch 'master';
+                    branch 'staging'
                 }
             }
             steps {
@@ -49,7 +50,8 @@ pipeline {
         stage("Terraform Apply") {
             when {
                 anyOf {
-                    branch 'master'
+                    branch 'master';
+                    branch 'staging'
                 }
             }
             steps {
