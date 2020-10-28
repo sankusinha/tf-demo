@@ -7,7 +7,7 @@ provider "aws" {
 terraform {
   backend "s3" {
     bucket = "my-s3-state-sanku"
-    key    = "/mytfstate/terraform.tfstate"
+    key    = "mytfstate/terraform.tfstate"
     region = "ap-southeast-1"
   }
 }
