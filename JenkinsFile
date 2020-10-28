@@ -3,7 +3,7 @@ pipeline {
    agent {
        node {
            label "master"
-           customWorkspace "c:/jk_workspace"
+           customWorkspace "/tmp/jk_workspace"
        }
    }
    parameters {
