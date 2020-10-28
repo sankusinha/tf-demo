@@ -38,7 +38,6 @@ pipeline {
                     branch 'master'
                 }
             }
-            agent none
             steps {
                 timeout(time: 3, unit: 'HOURS') {
                     script {
@@ -53,7 +52,6 @@ pipeline {
                     branch 'master'
                 }
             }
-            agent none
             steps {
                 sh """#!/bin/bash
                 export AWS_ACCESS_KEY_ID="${env.AWS_ACCESS_KEY}"
