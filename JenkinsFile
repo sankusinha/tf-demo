@@ -33,12 +33,12 @@ pipeline {
             }
         }
         stage("Terraform Approval of plan") {
-            when {
-                anyOf {
-                    branch 'master';
-                    branch 'staging'
-                }
-            }
+            //when {
+            //    anyOf {
+            //        branch 'master';
+            //        branch 'staging'
+            //    }
+            //}
             steps {
                 timeout(time: 3, unit: 'HOURS') {
                     script {
@@ -48,12 +48,12 @@ pipeline {
             }
         }
         stage("Terraform Apply") {
-            when {
-                anyOf {
-                    branch 'master';
-                    branch 'staging'
-                }
-            }
+            //when {
+            //    anyOf {
+            //        branch 'master';
+            //        branch 'staging'
+            //    }
+           // }
             steps {
                 sh """#!/bin/bash
                 export AWS_ACCESS_KEY_ID="${env.AWS_ACCESS_KEY}"
