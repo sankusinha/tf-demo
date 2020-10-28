@@ -1,73 +1,81 @@
+import com.cloudbees.plugins.credentials.impl.UsernamePasswordCredentialsImpl
 pipeline {
-    agent {
+   agent {
        node {
            label "master"
-           customWorkspace "/tmp/jk_workspace"
+           customWorkspace "c:/jk_workspace"
        }
    }
-    environment {
-        AWS_ACCESS_KEY = credentials('')
-        AWS_SECRET_KEY = credentials('')
-    }
-    options {
-        timestamps()
-    }
-    parameters {
-        string(name: "AWS_REGION", defaultValue: "ap-southeast-1", description: "AWS default region")
-        string(name: "NOTIFY", defaultValue: "sanku@sparce.co.uk", description: "Email address to notify job results")
-    }
+   parameters {
+       string(name: "service_principal", defaultValue:"ServicePrincipalName", description:"Display name of the Service Principal")
+       booleanParam(name: "RESET_ADUSER", defaultValue: false, description: "Tochange the ADUSER Password")
+       //choice choices: ['yes','no'], description: "Need to change AD user password?", name: 'RESET_ADUSER'
+   }
 
-    stages {
-        // Terraform Init and Plan
-        stage("Terraform Init and Plan") {
-            steps {
-                sh """#!/bin/bash
-                export AWS_ACCESS_KEY_ID="${env.AWS_ACCESS_KEY}"
-                export AWS_SECRET_ACCESS_KEY="${env.AWS_SECRET_KEY}"
-                export AWS_DEFAULT_REGION="${AWS_REGION}"
-                echo "Terraform init"
-                /usr/bin/terraform init
-                echo "Terraform Plan"
-                /usr/bin/terraform plan -no-color -input=false -out=tfplan-0
-                """
-            }
+   environment {
+       azure_cred = credentials('az-secret')
+       CH_ADUSER = "${params.RESET_ADUSER}"
+   }
+
+   stages {
+      stage('Azure Login') {
+         steps {
+             script
+             {
+                 powershell "az login --allow-no-subscriptions -u ${azure_cred_USR} -p ${azure_cred_PSW}"
+             }
+         }
+      }
+      stage("Test Service Principal"){
+          steps {
+          script {
+              powershell "az ad sp list --display-name ${service_principal}"
+          }
         }
-        stage("Terraform Approval of plan") {
-            when {
-                anyOf {
-                    branch 'master'
-                }
-            }
-            steps {
-                timeout(time: 3, unit: 'HOURS') {
-                    script {
-                        def userInput = input(id: 'confirm', message: 'Apply Terraform?', parameters: [[$class: 'BooleanParameterDefinition', defaultValue: false, description: 'Apply terraform', name: 'confirm']])
+      }
+      stage("Test Powershell condition") {
+          steps {
+              script {
+                  powershell '''
+                    \$t="abc"
+                    if($t -eq "xyz") {
+                        Write-Output \$t
                     }
-                }
-            }
-        }
-        stage("Terraform Apply") {
-            when {
-                anyOf {
-                    branch 'master'
-                }
-            }
-            steps {
-                sh """#!/bin/bash
-                export AWS_ACCESS_KEY_ID="${env.AWS_ACCESS_KEY}"
-                export AWS_SECRET_ACCESS_KEY="${env.AWS_SECRET_KEY}"
-                export AWS_DEFAULT_REGION="${AWS_REGION}"
+                    else {
+                        Write-Output "Not match"
+                    }
 
-                echo "Terraform Apply"
-                /usr/bin/terraform apply -input=false -no-color tfplan-0
-                """
-            }
-        }
-    }
-    post{
-       always{
+                  '''
+              }
+          }
+      }
+      stage("reset password") {
+          steps {
+              script {
+                  powershell """
+                    \$oldPassword = "Sanku#1Nupur"
+                    if ("${env:CH_ADUSER}" -eq "false") {
+                        Write-Output "false"
+                    }
+                    else {
+                        \$CurrentValue = [Environment]::GetEnvironmentVariable("PSModulePath", "Machine")
+                        \$UserPSModuleLocation = "C:\\Windows\\SysWOW64\\WindowsPowerShell\\v1.0\\Modules"
+                        \$env:PSModulePath = \$UserPSModuleLocation + ";" + \$CurrentValue
+                        Import-Module AzureAD
+                        add-type -AssemblyName System.Web
+                        \$secret=[System.Web.Security.Membership]::GeneratePassword(20,5)
+                        Write-Output \$secret
+                        Update-AzureADSignedInUserPassword -CurrentPassword \$oldPassword -NewPassword \$secret
+                    }
+                  """
+              }
+          }
+      }
+   }
+   post {
+       always {
            echo "Cleaning Workspace"
            deleteDir()
        }
-    }
+   }
 }
