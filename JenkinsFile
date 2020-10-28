@@ -63,13 +63,6 @@ pipeline {
     }
     post {
         always{
-            emailtext (
-                to: "${NOTIFY}",
-                subject: "[${currentBuild.currentResult}] #${env.BUILD_NUMBER} ${env.JOB_NAME}",
-                body: """
-                <p>Build URL: ${BUILD_URL}</p>
-                """
-            )
             cleanWs()
         }
     }
