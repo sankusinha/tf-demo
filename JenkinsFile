@@ -62,9 +62,9 @@ pipeline {
         }
     }
     post {
-        always{
-            agent none
-            cleanWs()
-        }
+       always {
+           echo "Cleaning Workspace"
+           deleteDir()
+       }
     }
 }
