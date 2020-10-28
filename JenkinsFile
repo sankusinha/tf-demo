@@ -64,13 +64,10 @@ pipeline {
             }
         }
     }
-    post {
-       always {
-           node("master") {
-                echo "Cleaning Workspace"
-                deleteDir()
-           }
-           
+    post{
+       always{
+           echo "Cleaning Workspace"
+           deleteDir()
        }
     }
 }
