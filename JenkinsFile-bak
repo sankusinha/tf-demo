@@ -53,7 +53,7 @@ pipeline {
           steps {
               script {
                   powershell """
-                    \$oldPassword = "Sanku#1Nupur"
+                    \$oldPassword = "temp@123"
                     if ("${env:CH_ADUSER}" -eq "false") {
                         Write-Output "false"
                     }
