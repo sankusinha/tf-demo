@@ -14,7 +14,7 @@ pipeline {
     }
     parameters {
         string(name: "AWS_REGION", defaultValue: "ap-southeast-1", description: "AWS default region")
-        string(name: "NOTIFY", defaultValue: "sanku@sparce.co.uk", description: "Email address to notify job results")
+        string(name: "NOTIFY", defaultValue: "sinhasanku@gmail.com", description: "Email address to notify job results")
     }
 
     stages {
