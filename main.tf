@@ -4,10 +4,10 @@ provider "aws" {
   //secret_key = var.AWS_SECRET_KEY
 }
 
-# terraform {
-#   backend "s3" {
-#     bucket = "my-s3-state-sanku"
-#     key    = "mytfstate/terraform.tfstate"
-#     region = "ap-southeast-1"
-#   }
-# }
+terraform {
+  backend "s3" {
+    bucket = "my-s3-state-sanku"
+    key    = "mytfstate/terraform.tfstate"
+    region = "ap-southeast-1"
+  }
+}
